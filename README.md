@@ -3,7 +3,7 @@
 > **Made by Anonymous-beta for Zaiyan**
 
 <p align="center">
-  <img src="web/static/img/zaiyan_logo.svg" width="200" alt="ZAIYAN Logo">
+  <img src="image-1.jpg" width="200" alt="ZAIYAN Logo">
 </p>
 
 <p align="center">
