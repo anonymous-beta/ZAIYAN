@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZAIYAN — Advanced Exploitation Framework</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/zaiyan.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="app">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="logo">
+                <div class="logo-icon">Z</div>
+                <div class="logo-text">
+                    <span class="logo-title">ZAIYAN</span>
+                    <span class="logo-subtitle">Advanced Exploitation</span>
+                </div>
+            </div>
+            
+            <div class="nav-section">
+                <span class="nav-label">Framework</span>
+                <a href="#" class="nav-item active" data-page="dashboard">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                    Dashboard
+                </a>
+                <a href="#" class="nav-item" data-page="modules">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                    Modules
+                </a>
+                <a href="#" class="nav-item" data-page="payloads">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                    Payloads
+                </a>
+                <a href="#" class="nav-item" data-page="sessions">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    Sessions
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <span class="nav-label">Operations</span>
+                <a href="#" class="nav-item" data-page="terminal">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+                    Terminal
+                </a>
+                <a href="#" class="nav-item" data-page="loot">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                    Loot
+                </a>
+            </div>
+            
+            <div class="sidebar-footer">
+                <span class="tagline">Made by Anonymous-beta for Zaiyan</span>
+                <span class="version">v1.0.0</span>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Bar -->
+            <header class="top-bar">
+                <div class="search-box">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                    <input type="text" id="global-search" placeholder="Search modules, sessions, targets...">
+                </div>
+                <div class="top-actions">
+                    <div class="status-indicator">
+                        <span class="status-dot online"></span>
+                        <span class="status-text">Framework Active</span>
+                    </div>
+                    <button class="btn btn-primary" id="new-operation">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        New Operation
+                    </button>
+                </div>
+            </header>
+
+            <!-- Dashboard Page -->
+            <div class="page active" id="page-dashboard">
+                <div class="page-header">
+                    <h1>Dashboard</h1>
+                    <p class="page-subtitle">Overview of your operation environment</p>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon exploit">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="stat-modules">0</span>
+                            <span class="stat-label">Modules Loaded</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon session">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="stat-sessions">0</span>
+                            <span class="stat-label">Active Sessions</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon target">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="stat-targets">0</span>
+                            <span class="stat-label">Targets Engaged</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon payload">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="stat-payloads">0</span>
+                            <span class="stat-label">Payloads Generated</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h3>Recent Activity</h3>
+                            <button class="btn btn-sm">View All</button>
+                        </div>
+                        <div class="panel-content" id="activity-log">
+                            <div class="activity-item">
+                                <span class="activity-time">07:00:23</span>
+                                <span class="activity-type exploit">EXPLOIT</span>
+                                <span class="activity-desc">ms17_010_eternalblue executed against 192.168.1.105</span>
+                                <span class="activity-status success">SUCCESS</span>
+                            </div>
+                            <div class="activity-item">
+                                <span class="activity-time">06:45:12</span>
+                                <span class="activity-type payload">PAYLOAD</span>
+                                <span class="activity-desc">reverse_tcp generated for x64/elf</span>
+                                <span class="activity-status success">COMPLETE</span>
+                            </div>
+                            <div class="activity-item">
+                                <span class="activity-time">06:30:00</span>
+                                <span class="activity-type scan">SCAN</span>
+                                <span class="activity-desc">Port scan completed: 12 hosts, 47 open ports</span>
+                                <span class="activity-status info">INFO</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h3>Active Sessions</h3>
+                            <button class="btn btn-sm">Manage</button>
+                        </div>
+                        <div class="panel-content" id="sessions-preview">
+                            <div class="session-item">
+                                <div class="session-dot active"></div>
+                                <div class="session-info">
+                                    <span class="session-id">a7f3b2d1</span>
+                                    <span class="session-target">192.168.1.105:445</span>
+                                </div>
+                                <span class="session-type">meterpreter</span>
+                            </div>
+                            <div class="session-item">
+                                <div class="session-dot active"></div>
+                                <div class="session-info">
+                                    <span class="session-id">e9c8a4f2</span>
+                                    <span class="session-target">10.0.0.22:22</span>
+                                </div>
+                                <span class="session-type">shell</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modules Page -->
+            <div class="page" id="page-modules">
+                <div class="page-header">
+                    <h1>Modules</h1>
+                    <p class="page-subtitle">Browse and execute exploitation modules</p>
+                </div>
+                
+                <div class="modules-toolbar">
+                    <div class="filter-tabs">
+                        <button class="filter-tab active" data-filter="all">All</button>
+                        <button class="filter-tab" data-filter="exploit">Exploits</button>
+                        <button class="filter-tab" data-filter="payload">Payloads</button>
+                        <button class="filter-tab" data-filter="auxiliary">Auxiliary</button>
+                        <button class="filter-tab" data-filter="post">Post</button>
+                        <button class="filter-tab" data-filter="encoder">Encoders</button>
+                        <button class="filter-tab" data-filter="evasion">Evasion</button>
+                    </div>
+                    <div class="modules-search">
+                        <input type="text" id="module-search" placeholder="Filter modules...">
+                    </div>
+                </div>
+                
+                <div class="modules-grid" id="modules-grid">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+            <!-- Payloads Page -->
+            <div class="page" id="page-payloads">
+                <div class="page-header">
+                    <h1>Payload Generator</h1>
+                    <p class="page-subtitle">Build architecture-aware payloads with evasion</p>
+                </div>
+                
+                <div class="payload-builder">
+                    <div class="builder-form">
+                        <div class="form-group">
+                            <label>Payload Type</label>
+                            <select id="payload-type">
+                                <option value="reverse_tcp">Reverse TCP</option>
+                                <option value="reverse_https">Reverse HTTPS</option>
+                                <option value="bind_tcp">Bind TCP</option>
+                                <option value="dns_stager">DNS Stager</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Architecture</label>
+                            <select id="payload-arch">
+                                <option value="x64">x64</option>
+                                <option value="x86">x86</option>
+                                <option value="arm">ARM</option>
+                                <option value="arm64">ARM64</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Output Format</label>
+                            <select id="payload-format">
+                                <option value="raw">Raw</option>
+                                <option value="exe">Windows PE (.exe)</option>
+                                <option value="elf">Linux ELF</option>
+                                <option value="apk">Android APK</option>
+                                <option value="python">Python</option>
+                                <option value="powershell">PowerShell</option>
+                                <option value="csharp">C#</option>
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>LHOST</label>
+                                <input type="text" id="payload-lhost" placeholder="192.168.1.100">
+                            </div>
+                            <div class="form-group">
+                                <label>LPORT</label>
+                                <input type="number" id="payload-lport" value="4444">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="payload-evade">
+                                <span>Apply Evasion</span>
+                            </label>
+                        </div>
+                        <div class="form-group" id="evasion-options" style="display:none;">
+                            <label>Evasion Technique</label>
+                            <select id="evasion-type">
+                                <option value="xor">XOR Encoding</option>
+                                <option value="amsi">AMSI Bypass</option>
+                                <option value="sleep">Sleep Obfuscation</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-primary btn-block" id="generate-payload">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                            Generate Payload
+                        </button>
+                    </div>
+                    
+                    <div class="builder-output">
+                        <div class="output-header">
+                            <span>Output</span>
+                            <button class="btn btn-sm" id="copy-output">Copy</button>
+                        </div>
+                        <pre id="payload-output" class="output-terminal"><code class="placeholder">Payload will appear here...</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sessions Page -->
+            <div class="page" id="page-sessions">
+                <div class="page-header">
+                    <h1>Sessions</h1>
+                    <p class="page-subtitle">Manage active compromised sessions</p>
+                </div>
+                
+                <div class="sessions-table-wrapper">
+                    <table class="sessions-table" id="sessions-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Type</th>
+                                <th>Target</th>
+                                <th>Module</th>
+                                <th>Created</th>
+                                <th>Last Check-in</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sessions-tbody">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Terminal Page -->
+            <div class="page" id="page-terminal">
+                <div class="page-header">
+                    <h1>Terminal</h1>
+                    <p class="page-subtitle">Interactive command execution</p>
+                </div>
+                
+                <div class="terminal-container">
+                    <div class="terminal-output" id="terminal-output">
+                        <div class="terminal-line">
+                            <span class="terminal-prompt">zaiyan ></span>
+                            <span class="terminal-text">Welcome to ZAIYAN Interactive Terminal</span>
+                        </div>
+                        <div class="terminal-line">
+                            <span class="terminal-prompt">zaiyan ></span>
+                            <span class="terminal-text">Type 'help' for available commands</span>
+                        </div>
+                    </div>
+                    <div class="terminal-input-line">
+                        <span class="terminal-prompt">zaiyan ></span>
+                        <input type="text" id="terminal-input" placeholder="Enter command..." autocomplete="off">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loot Page -->
+            <div class="page" id="page-loot">
+                <div class="page-header">
+                    <h1>Loot</h1>
+                    <p class="page-subtitle">Harvested credentials and data</p>
+                </div>
+                
+                <div class="loot-grid" id="loot-grid">
+                    <div class="loot-card">
+                        <div class="loot-type">CREDENTIALS</div>
+                        <div class="loot-source">192.168.1.105</div>
+                        <div class="loot-data">
+                            <div class="loot-item">
+                                <span class="loot-label">Username</span>
+                                <span class="loot-value">administrator</span>
+                            </div>
+                            <div class="loot-item">
+                                <span class="loot-label">Password</span>
+                                <span class="loot-value">P@ssw0rd123!</span>
+                            </div>
+                            <div class="loot-item">
+                                <span class="loot-label">Domain</span>
+                                <span class="loot-value">CORP</span>
+                            </div>
+                        </div>
+                        <div class="loot-time">2026-07-02 06:45:12</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Module Detail Modal -->
+    <div class="modal" id="module-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Module Name</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="modal-description">Description</p>
+                <div class="modal-meta">
+                    <span id="modal-type" class="badge">exploit</span>
+                    <span id="modal-author">Anonymous-beta</span>
+                    <span id="modal-platform">windows</span>
+                </div>
+                <div class="options-form" id="modal-options">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary modal-close">Cancel</button>
+                <button class="btn btn-primary" id="modal-execute">Execute</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script src="{{ url_for('static', filename='js/zaiyan.js') }}"></script>
+</body>
+</html>
