@@ -14,7 +14,7 @@ document.querySelectorAll('.nav-item').forEach(item => {
         e.preventDefault();
         const page = item.dataset.page;
         navigateTo(page);
-        
+
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         item.classList.add('active');
     });
@@ -24,7 +24,7 @@ function navigateTo(page) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.getElementById(`page-${page}`).classList.add('active');
     currentPage = page;
-    
+
     if (page === 'modules') loadModules();
     if (page === 'sessions') loadSessions();
 }
@@ -59,7 +59,7 @@ socket.on('error', (data) => {
 function updateStatus(online) {
     const dot = document.querySelector('.status-dot');
     const text = document.querySelector('.status-text');
-    
+
     if (online) {
         dot.classList.add('online');
         dot.style.background = 'var(--success)';
@@ -79,7 +79,7 @@ async function loadModules() {
         const response = await fetch('/api/modules');
         const data = await response.json();
         modules = data.modules;
-        
+
         document.getElementById('stat-modules').textContent = data.count;
         renderModules(modules);
     } catch (e) {
@@ -90,7 +90,7 @@ async function loadModules() {
 function renderModules(moduleList) {
     const grid = document.getElementById('modules-grid');
     grid.innerHTML = '';
-    
+
     moduleList.forEach(mod => {
         const card = document.createElement('div');
         card.className = 'module-card';
@@ -105,7 +105,7 @@ function renderModules(moduleList) {
                 <span>${mod.author}</span>
             </div>
         `;
-        
+
         card.addEventListener('click', () => openModuleModal(mod.name));
         grid.appendChild(card);
     });
@@ -116,7 +116,7 @@ document.querySelectorAll('.filter-tab').forEach(tab => {
     tab.addEventListener('click', () => {
         document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
-        
+
         const filter = tab.dataset.filter;
         if (filter === 'all') {
             renderModules(modules);
@@ -129,7 +129,7 @@ document.querySelectorAll('.filter-tab').forEach(tab => {
 // Module Search
 document.getElementById('module-search').addEventListener('input', (e) => {
     const query = e.target.value.toLowerCase();
-    const filtered = modules.filter(m => 
+    const filtered = modules.filter(m =>
         m.name.toLowerCase().includes(query) ||
         m.description.toLowerCase().includes(query)
     );
@@ -140,7 +140,7 @@ document.getElementById('module-search').addEventListener('input', (e) => {
 document.getElementById('global-search').addEventListener('input', (e) => {
     const query = e.target.value.toLowerCase();
     if (query.length < 2) return;
-    
+
     fetch(`/api/search?q=${encodeURIComponent(query)}`)
         .then(r => r.json())
         .then(data => {
@@ -155,37 +155,37 @@ async function openModuleModal(moduleName) {
         const response = await fetch(`/api/modules/${encodeURIComponent(moduleName)}`);
         const mod = await response.json();
         currentModule = mod;
-        
+
         document.getElementById('modal-title').textContent = mod.name;
         document.getElementById('modal-description').textContent = mod.description || 'No description';
         document.getElementById('modal-type').textContent = mod.type;
         document.getElementById('modal-author').textContent = mod.author;
         document.getElementById('modal-platform').textContent = mod.platform.join(', ');
-        
+
         // Build options form
         const optionsForm = document.getElementById('modal-options');
         optionsForm.innerHTML = '';
-        
+
         if (mod.options) {
             Object.entries(mod.options).forEach(([key, config]) => {
                 const group = document.createElement('div');
                 group.className = 'form-group';
-                
+
                 const label = document.createElement('label');
                 label.textContent = `${key} ${config.required ? '*' : ''}`;
                 group.appendChild(label);
-                
+
                 const input = document.createElement('input');
                 input.type = 'text';
                 input.value = config.value || '';
                 input.placeholder = config.description || '';
                 input.dataset.option = key;
                 group.appendChild(input);
-                
+
                 optionsForm.appendChild(group);
             });
         }
-        
+
         document.getElementById('module-modal').classList.add('active');
     } catch (e) {
         console.error('Failed to load module details:', e);
@@ -208,28 +208,28 @@ document.getElementById('module-modal').addEventListener('click', (e) => {
 // Execute Module
 document.getElementById('modal-execute').addEventListener('click', async () => {
     if (!currentModule) return;
-    
+
     const options = {};
     document.querySelectorAll('#modal-options input').forEach(input => {
         options[input.dataset.option] = input.value;
     });
-    
+
     try {
         const response = await fetch(`/api/modules/${encodeURIComponent(currentModule.name)}/execute`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ options })
         });
-        
+
         const result = await response.json();
-        
+
         if (result.success) {
             appendTerminalOutput(`[+] ${currentModule.name} executed successfully`, 'success');
             appendTerminalOutput(result.result, 'info');
         } else {
             appendTerminalOutput(`[-] Execution failed: ${result.error}`, 'error');
         }
-        
+
         document.getElementById('module-modal').classList.remove('active');
     } catch (e) {
         appendTerminalOutput(`[-] Request failed: ${e.message}`, 'error');
@@ -245,10 +245,10 @@ document.getElementById('generate-payload').addEventListener('click', async () =
     const lport = document.getElementById('payload-lport').value;
     const evade = document.getElementById('payload-evade').checked;
     const evasionType = document.getElementById('evasion-type').value;
-    
+
     const output = document.getElementById('payload-output');
     output.innerHTML = '<code class="placeholder">Generating payload...</code>';
-    
+
     try {
         const response = await fetch('/api/payloads/generate', {
             method: 'POST',
@@ -258,9 +258,9 @@ document.getElementById('generate-payload').addEventListener('click', async () =
                 evade, evasion_type: evasionType
             })
         });
-        
+
         const result = await response.json();
-        
+
         if (result.success) {
             output.innerHTML = `<code>[+] Payload generated: ${result.file}
 [+] Size: ${result.size} bytes
@@ -269,8 +269,8 @@ document.getElementById('generate-payload').addEventListener('click', async () =
 
 [*] Start listener: nc -lvnp ${lport}
 [*] Deliver payload to target</code>`;
-            
-            document.getElementById('stat-payloads').textContent = 
+
+            document.getElementById('stat-payloads').textContent =
                 parseInt(document.getElementById('stat-payloads').textContent) + 1;
         } else {
             output.innerHTML = `<code class="error">[-] Generation failed: ${result.error}</code>`;
@@ -282,7 +282,7 @@ document.getElementById('generate-payload').addEventListener('click', async () =
 
 // Evasion toggle
 document.getElementById('payload-evade').addEventListener('change', (e) => {
-    document.getElementById('evasion-options').style.display = 
+    document.getElementById('evasion-options').style.display =
         e.target.checked ? 'block' : 'none';
 });
 
@@ -303,7 +303,7 @@ async function loadSessions() {
         const response = await fetch('/api/sessions');
         const data = await response.json();
         sessions = data.sessions;
-        
+
         document.getElementById('stat-sessions').textContent = sessions.length;
         renderSessions();
     } catch (e) {
@@ -314,7 +314,7 @@ async function loadSessions() {
 function renderSessions() {
     const tbody = document.getElementById('sessions-tbody');
     tbody.innerHTML = '';
-    
+
     sessions.forEach(s => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
@@ -362,14 +362,14 @@ terminalInput.addEventListener('keydown', (e) => {
 function appendTerminalOutput(text, type = 'info') {
     const line = document.createElement('div');
     line.className = 'terminal-line';
-    
+
     const prompt = document.createElement('span');
     prompt.className = 'terminal-prompt';
     prompt.textContent = type === 'command' ? 'zaiyan >' : '      >';
-    
+
     const content = document.createElement('span');
     content.className = 'terminal-text';
-    
+
     if (type === 'error') {
         content.style.color = 'var(--error)';
     } else if (type === 'success') {
@@ -377,7 +377,7 @@ function appendTerminalOutput(text, type = 'info') {
     } else if (type === 'command') {
         content.style.color = 'var(--accent-secondary)';
     }
-    
+
     content.textContent = text;
     line.appendChild(prompt);
     line.appendChild(content);
@@ -411,7 +411,7 @@ function executeTerminalCommand(cmd) {
 document.addEventListener('DOMContentLoaded', () => {
     loadModules();
     loadSessions();
-    
+
     // Simulate some initial stats
     document.getElementById('stat-targets').textContent = '3';
     document.getElementById('stat-payloads').textContent = '7';
