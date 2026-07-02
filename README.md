@@ -118,4 +118,4 @@ ZAIYAN is intended for authorized security testing and research only. Users are 
 License
 ## MIT License — See LICENSE file.
 �
-Made by Anonymous-beta for Zaiyan 
+Made by Anonymous-beta for Zaiyan (I DEY QUICK VEX OOO SO BETTER STAR MY REPO)
