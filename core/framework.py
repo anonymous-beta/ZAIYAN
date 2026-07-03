@@ -7,7 +7,6 @@ from typing import Dict, List, Optional, Any
 from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
-from rich.text import Text
 
 from core.database import ModuleDatabase
 from core.session_manager import SessionManager
@@ -15,6 +14,19 @@ from core.payload_generator import PayloadGenerator
 from core.evasion_engine import EvasionEngine
 
 console = Console()
+
+BANNER = r"""
+    ███████╗ █████╗ ██╗██╗   ██╗ █████╗ ███╗   ██╗
+    ╚══███╔╝██╔══██╗██║╚██╗ ██╔╝██╔══██╗████╗  ██║
+      ███╔╝ ███████║██║ ╚████╔╝ ███████║██╔██╗ ██║
+     ███╔╝  ██╔══██║██║  ╚██╔╝  ██╔══██║██║╚██╗██║
+    ███████╗██║  ██║██║   ██║   ██║  ██║██║ ╚████║
+    ╚══════╝╚═╝  ╚═╝╚═╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═══╝
+    
+    [ Advanced Exploitation Framework v1.0.0 ]
+    Made by Anonymous-beta for Zaiyan
+"""
+
 
 class ZaiyanFramework:
     def __init__(self):
@@ -64,7 +76,6 @@ class ZaiyanFramework:
                     module = importlib.util.module_from_spec(spec)
                     spec.loader.exec_module(module)
 
-                    # Look for module class
                     for attr_name in dir(module):
                         attr = getattr(module, attr_name)
                         if (isinstance(attr, type) and
@@ -92,7 +103,6 @@ class ZaiyanFramework:
 
     def use_module(self, module_name: str) -> bool:
         """Select a module for use"""
-        # Fuzzy match
         matches = [k for k in self.modules.keys() if module_name.lower() in k.lower()]
         if not matches:
             console.print(f"[red][!] No module matching '{module_name}'[/red]")
@@ -152,7 +162,6 @@ class ZaiyanFramework:
             console.print("[red][!] No module selected[/red]")
             return None
 
-        # Validate required options
         missing = []
         for name, config in self.current_module.options.items():
             if config.get("required", False) and not config.get("value"):
